@@ -10,7 +10,8 @@ string jsonFile = "example.json";
 // Set up our Dall-E wrapper
 var dalle = new SimpleDallEWrapper(azureOpenAiEndpoint, azureOpenAiKey, dalleDeploymentName);
 
-var items = LoadArrayFromJson<(string Id, string Description)>(jsonFile);
+
+var items = LoadArrayFromJson<ItemFormat>(jsonFile);
 (int Width, int Height)[] sizes = [
     (200, 200),
     (512, 512),
@@ -25,6 +26,7 @@ foreach (var (Width, Height) in sizes) Directory.CreateDirectory($"{resizePathPr
 foreach (var (Id, Description) in items)
 {
     string prompt = $"A \"{Description}\" on a blank white background, retail photography, no shadows, no text, lightbox, middle of image, plain white background";
+    Console.WriteLine("Generating:\n" + prompt);
 
     var image = await dalle.GenerateImageAsync(prompt);
     WriteWithLogging(Path.Combine(rawPath, Id + ".png"), image);
@@ -45,3 +47,5 @@ static void WriteWithLogging(string path, byte[] data)
 }
 static T[] LoadArrayFromJson<T>(string fileName)
     => JsonSerializer.Deserialize<T[]>(File.ReadAllText(fileName)) ?? throw new("Null json");
+
+record ItemFormat(string Id, string Description);
